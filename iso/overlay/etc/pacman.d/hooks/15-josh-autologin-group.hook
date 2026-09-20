@@ -1,0 +1,12 @@
+# remove from airootfs!
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = base
+
+[Action]
+Description = Creating Josh OS live autologin group...
+When = PostTransaction
+Depends = shadow
+Exec = /usr/bin/groupadd -f -r autologin
