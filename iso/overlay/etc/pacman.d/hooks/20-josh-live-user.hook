@@ -1,0 +1,12 @@
+# remove from airootfs!
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = base
+
+[Action]
+Description = Creating Josh OS live user with UID 1000...
+When = PostTransaction
+Depends = shadow
+Exec = /usr/bin/useradd -u 1000 -G autologin -p '' -s /usr/bin/bash -m josh
