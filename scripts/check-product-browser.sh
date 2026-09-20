@@ -90,8 +90,8 @@ grep -q 'JOSHOS_BROWSER_MEDIA_OK' "$runtime_acceptance"
 grep -q 'JOSHOS_BROWSER_DOWNLOAD_OK' "$runtime_acceptance"
 grep -q 'JOSHOS_BROWSER_CRASH_RECOVERY_OK' "$runtime_acceptance"
 grep -q 'org.mozilla.firefox' "$catalog"
-grep -q '"runtime":"flatpak"' "$catalog"
-grep -q '"runtime":"wine"' "$catalog"
+grep -Eq '"runtime"[[:space:]]*:[[:space:]]*"flatpak"' "$catalog"
+grep -Eq '"runtime"[[:space:]]*:[[:space:]]*"wine"' "$catalog"
 grep -q '/api/apps/launch' "$root/usr/local/lib/josh-os/network-control.py"
 
 [[ -L "$root/etc/systemd/system/multi-user.target.wants/josh-os-persistence.service" ]]
