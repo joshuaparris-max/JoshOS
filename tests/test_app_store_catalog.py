@@ -12,7 +12,9 @@ DIGEST = ROOT / "iso" / "overlay" / "opt" / "josh-os" / "app-store" / "catalog.s
 class AppStoreCatalogTests(unittest.TestCase):
     def test_catalog_digest_matches(self):
         expected = DIGEST.read_text(encoding="utf-8").split()[0]
-        actual = hashlib.sha256(CATALOG.read_bytes()).hexdigest()
+        # Git may materialize the checked-in JSON with CRLF on Windows; the
+        # catalog digest is defined over its canonical LF representation.
+        actual = hashlib.sha256(CATALOG.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
         self.assertEqual(expected, actual)
 
     def test_catalog_has_supported_runtime_entries(self):
