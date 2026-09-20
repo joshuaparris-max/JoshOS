@@ -27,7 +27,8 @@ Each stage should produce something testable rather than a pile of scaffolding.
 - [ ] real panel, dock, launcher and notification surfaces
 - [ ] Settings backed by real system services
 - [ ] installer
-- [ ] application packaging/update story
+- [ ] signed app repository and Flatpak application packaging/update story
+- [ ] Wine-managed Windows application compatibility layer
 - [ ] accessibility and keyboard-navigation pass
 
 ## Stage 2 — own more userland where it helps

@@ -13,6 +13,7 @@ required_packages=(
   sof-firmware
   mesa-utils
   ffmpeg
+  flatpak
   intel-media-driver
   libsecret
   libva-intel-driver
@@ -26,6 +27,7 @@ required_packages=(
   pipewire-pulse
   vulkan-intel
   vulkan-radeon
+  wine
   wireplumber
 )
 
@@ -46,8 +48,9 @@ persist="$root/usr/local/lib/josh-os/prepare-persistent-home"
 media_probe="$root/usr/local/lib/josh-os/browser-media-probe"
 media_page="$root/usr/local/share/josh-os/browser-media-probe.html"
 policy="$root/etc/chromium/policies/managed/josh-os.json"
+catalog="$root/opt/josh-os/app-store/catalog.json"
 
-for path in "$launcher" "$acceptance" "$runtime_acceptance" "$runtime_page" "$runtime_download" "$session" "$persist" "$media_probe" "$media_page" "$policy"; do
+for path in "$launcher" "$acceptance" "$runtime_acceptance" "$runtime_page" "$runtime_download" "$session" "$persist" "$media_probe" "$media_page" "$policy" "$catalog"; do
   [[ -f "$path" ]] || { echo "browser check: missing $path" >&2; exit 1; }
 done
 
@@ -76,6 +79,10 @@ grep -q 'josh-os-browser chrome://newtab' "$session"
 grep -q 'JOSHOS_BROWSER_MEDIA_OK' "$runtime_acceptance"
 grep -q 'JOSHOS_BROWSER_DOWNLOAD_OK' "$runtime_acceptance"
 grep -q 'JOSHOS_BROWSER_CRASH_RECOVERY_OK' "$runtime_acceptance"
+grep -q 'org.mozilla.firefox' "$catalog"
+grep -q '"runtime":"flatpak"' "$catalog"
+grep -q '"runtime":"wine"' "$catalog"
+grep -q '/api/apps/launch' "$root/usr/local/lib/josh-os/network-control.py"
 
 [[ -L "$root/etc/systemd/system/multi-user.target.wants/josh-os-persistence.service" ]]
 [[ -L "$root/etc/systemd/system/multi-user.target.wants/NetworkManager.service" ]]

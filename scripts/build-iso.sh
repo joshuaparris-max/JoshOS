@@ -52,6 +52,7 @@ packages=(
   sof-firmware
   mesa-utils
   ffmpeg
+  flatpak
   intel-media-driver
   iproute2
   iw
@@ -76,6 +77,7 @@ packages=(
   ttf-dejavu
   vulkan-intel
   vulkan-radeon
+  wine
   wireplumber
   wireless-regdb
   wpa_supplicant
@@ -83,6 +85,8 @@ packages=(
   xorg-xrandr
   xorg-xset
   xorg-xsetroot
+  xterm
+  zsh
 )
 
 for package in "${packages[@]}"; do

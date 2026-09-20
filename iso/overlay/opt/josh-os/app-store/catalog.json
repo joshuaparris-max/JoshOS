@@ -1,0 +1,37 @@
+{
+  "format": 1,
+  "repository": "Josh OS curated applications",
+  "apps": [
+    {
+      "id": "org.mozilla.firefox",
+      "name": "Firefox",
+      "summary": "Private, open web browsing",
+      "runtime": "flatpak",
+      "remote": "flathub",
+      "ref": "org.mozilla.firefox",
+      "license": "MPL-2.0",
+      "homepage": "https://www.mozilla.org/firefox/"
+    },
+    {
+      "id": "org.videolan.VLC",
+      "name": "VLC",
+      "summary": "Play video and audio files",
+      "runtime": "flatpak",
+      "remote": "flathub",
+      "ref": "org.videolan.VLC",
+      "license": "GPL-2.0-or-later",
+      "homepage": "https://www.videolan.org/vlc/"
+    },
+    {
+      "id": "com.microsoft.Edge",
+      "name": "Microsoft Edge",
+      "summary": "Run a compatible Windows app in an isolated Wine prefix",
+      "runtime": "wine",
+      "installable": true,
+      "installerSource": "downloads",
+      "reason": "Place a trusted .exe installer in Downloads, then install it into an isolated Wine prefix.",
+      "license": "Proprietary",
+      "homepage": "https://www.microsoft.com/edge"
+    }
+  ]
+}

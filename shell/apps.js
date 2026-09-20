@@ -51,6 +51,82 @@
     }
   });
 
+  /* ---------- App Store ---------- */
+
+  JoshOS.registerApp({
+    id: 'store',
+    name: 'App Store',
+    glyph: '\u2692',
+    width: 620,
+    height: 420,
+    mount: function (body) {
+      var wrap = el('div', 'app');
+      var list = el('div', 'store-list');
+      wrap.appendChild(el('h2', null, 'App Store'));
+      wrap.appendChild(el('p', 'muted', 'Curated Linux apps run through Flatpak. Windows apps run in managed Wine prefixes.'));
+      wrap.appendChild(list);
+      body.appendChild(wrap);
+
+      function showMessage(message) {
+        list.innerHTML = '';
+        list.appendChild(el('p', 'muted', message));
+      }
+
+      function load() {
+        showMessage('Loading catalog...');
+        api('/api/apps/catalog').then(function (catalog) {
+          list.innerHTML = '';
+          (catalog.apps || []).forEach(function (app) {
+            var row = el('div', 'row store-item');
+            var copy = el('div');
+            copy.appendChild(el('strong', null, app.name));
+            copy.appendChild(el('div', 'muted', app.summary));
+            row.appendChild(copy);
+            var actions = el('div', 'row');
+            var action = el('button', null, app.installed ? 'Open' : (app.runtime === 'wine' ? 'Install .exe' : 'Install'));
+            action.disabled = app.installable === false;
+            action.onclick = function () {
+              action.disabled = true;
+              action.textContent = 'Working...';
+              if (app.installed) {
+                api('/api/apps/launch', { method: 'POST', body: JSON.stringify({ id: app.id }) })
+                  .then(function (result) { JoshOS.notify('App Store', result.message); load(); })
+                  .catch(function (error) { JoshOS.notify('App Store', error.message); load(); });
+                return;
+              }
+              var endpoint = app.installed ? '/api/apps/uninstall' : '/api/apps/install';
+              var filename = app.runtime === 'wine' && !app.installed ? window.prompt('Enter the .exe filename in Downloads') : null;
+              var executable = app.runtime === 'wine' && !app.installed ? window.prompt('Enter the installed .exe path, for example Program Files\\App\\app.exe') : null;
+              if (app.runtime === 'wine' && !filename) { action.disabled = false; action.textContent = 'Install .exe'; return; }
+              if (app.runtime === 'wine' && !executable) { action.disabled = false; action.textContent = 'Install .exe'; return; }
+              api(endpoint, { method: 'POST', body: JSON.stringify({ id: app.id, filename: filename, executable: executable }) })
+                .then(function (result) { JoshOS.notify('App Store', result.message); load(); })
+                .catch(function (error) { JoshOS.notify('App Store', error.message); load(); });
+            };
+            actions.appendChild(action);
+            if (app.installed && app.runtime === 'flatpak') {
+              var remove = el('button', null, 'Remove');
+              remove.onclick = function () {
+                remove.disabled = true;
+                api('/api/apps/uninstall', { method: 'POST', body: JSON.stringify({ id: app.id }) })
+                  .then(function (result) { JoshOS.notify('App Store', result.message); load(); })
+                  .catch(function (error) { JoshOS.notify('App Store', error.message); load(); });
+              };
+              actions.appendChild(remove);
+            }
+            row.appendChild(actions);
+            list.appendChild(row);
+          });
+          if (!catalog.apps || !catalog.apps.length) showMessage('No applications are available in this catalog.');
+        }).catch(function (error) {
+          showMessage('App Store is unavailable: ' + error.message);
+        });
+      }
+
+      load();
+    }
+  });
+
   /* ---------- Files ---------- */
 
   var FS = {
@@ -114,82 +190,381 @@
     }
   });
 
-  /* ---------- Terminal ---------- */
+  /* ---------- Terminal (Windows Terminal, GNOME, macOS, Konsole) ---------- */
 
   JoshOS.registerApp({
     id: 'terminal',
     name: 'Terminal',
     glyph: '\u232B',
-    width: 560,
-    height: 340,
+    width: 720,
+    height: 440,
     mount: function (body) {
-      var term = el('div', 'terminal');
-      var out = el('div');
-      var line = el('div', 'line');
-      var prompt = el('span', 'prompt', 'josh@joshos:~$ ');
-      var input = el('input', 'terminal-input');
-      input.setAttribute('spellcheck', 'false');
-      input.setAttribute('autocomplete', 'off');
-
-      line.appendChild(prompt);
-      line.appendChild(input);
-      term.appendChild(out);
-      term.appendChild(line);
-      body.appendChild(term);
-
-      function print(text) {
-        var l = el('div', 'line', text);
-        out.appendChild(l);
-        term.scrollTop = term.scrollHeight;
-      }
-
-      var commands = {
-        help: function () {
-          print('Commands: help, about, ls, open <app>, theme <light|dark>, wallpaper <name>, apps, clear, echo <text>');
+      var PROFILES = {
+        winterm: {
+          id: 'winterm',
+          name: 'PowerShell',
+          icon: '🪟',
+          short: 'WinTerm',
+          cls: 'profile-winterm',
+          shell: 'powershell',
+          banner: 'Windows Terminal (PowerShell 7.4.5)\nRunning on Josh OS kernel. PowerShell cmdlets & native Linux binaries available.\nType "help" for profiles or run any Linux/PowerShell command.',
+          promptHtml: function (cwd) {
+            return '<span class="prompt-ps">PS</span> <span class="prompt-path">' + (cwd || '/home/josh') + '</span>&gt; ';
+          }
         },
-        about: function () {
-          print('Josh OS shell prototype v0.1.0 — stage 0 product track.');
+        gnome: {
+          id: 'gnome',
+          name: 'GNOME Terminal',
+          icon: '🐧',
+          short: 'GNOME',
+          cls: 'profile-gnome',
+          shell: 'bash',
+          banner: 'Welcome to Josh OS (Linux 6.10-arch1 x86_64)\nGNOME Terminal 3.52 (Bash) — Ubuntu/Fedora style host.\nType "help" or run any command.',
+          promptHtml: function (cwd) {
+            var displayPath = cwd === '/home/josh' ? '~' : (cwd || '~');
+            return '<span class="prompt-user-gnome">josh@joshos</span>:<span class="prompt-path">' + displayPath + '</span>$ ';
+          }
         },
-        ls: function () {
-          print((FS.Home || []).map(function (f) { return f.n; }).join('   '));
+        macos: {
+          id: 'macos',
+          name: 'macOS Terminal',
+          icon: '🍎',
+          short: 'macOS',
+          cls: 'profile-macos',
+          shell: 'zsh',
+          banner: 'Last login: ' + new Date().toDateString() + ' on ttys001\nmacOS Terminal.app emulation (Zsh shell)\nType "help" or run any command.',
+          promptHtml: function (cwd) {
+            var displayPath = cwd === '/home/josh' ? '~' : (cwd || '~');
+            return '<span class="prompt-user-macos">josh@Josh-MacBook</span> <span class="prompt-path">' + displayPath + '</span> % ';
+          }
         },
-        apps: function () {
-          print(JoshOS.apps().map(function (a) { return a.id; }).join('   '));
-        },
-        open: function (args) {
-          if (!args[0]) return print('usage: open <app>');
-          JoshOS.openApp(args[0]);
-        },
-        theme: function (args) {
-          if (args[0] !== 'light' && args[0] !== 'dark') return print('usage: theme <light|dark>');
-          JoshOS.setTheme(args[0]);
-          print('theme set to ' + args[0]);
-        },
-        wallpaper: function (args) {
-          var names = Object.keys(JoshOS.wallpapers);
-          if (names.indexOf(args[0]) === -1) return print('available: ' + names.join(', '));
-          JoshOS.setWallpaper(args[0]);
-          print('wallpaper set to ' + args[0]);
-        },
-        echo: function (args) { print(args.join(' ')); },
-        clear: function () { out.innerHTML = ''; }
+        konsole: {
+          id: 'konsole',
+          name: 'Konsole',
+          icon: '⚙️',
+          short: 'Konsole',
+          cls: 'profile-konsole',
+          shell: 'bash',
+          banner: 'KDE Konsole 24.05 (KDE Plasma 6.1)\nHardware-accelerated Linux terminal emulator.\nType "help" or run any command.',
+          promptHtml: function (cwd) {
+            var displayPath = cwd === '/home/josh' ? '~' : (cwd || '~');
+            return '[<span class="prompt-user-konsole">josh@joshos</span> <span class="prompt-path">' + displayPath + '</span>]$ ';
+          }
+        }
       };
 
-      input.addEventListener('keydown', function (e) {
-        if (e.key !== 'Enter') return;
-        var raw = input.value.trim();
-        input.value = '';
-        print('josh@joshos:~$ ' + raw);
-        if (!raw) return;
-        var parts = raw.split(/\s+/);
-        var cmd = commands[parts[0]];
-        if (cmd) cmd(parts.slice(1));
-        else print(parts[0] + ': command not found. Try "help".');
+      var container = el('div', 'terminal');
+      var topBar = el('div', 'terminal-bar');
+      var tabsNav = el('div', 'terminal-tabs');
+      var profileNav = el('div', 'terminal-profile-switcher');
+      var viewport = el('div', 'terminal-viewport');
+
+      var tabs = [];
+      var activeTab = null;
+      var nextTabId = 1;
+
+      // Profile quick-switch buttons in top right
+      ['winterm', 'gnome', 'macos', 'konsole'].forEach(function (profKey) {
+        var prof = PROFILES[profKey];
+        var btn = el('button', 'profile-pill', prof.icon + ' ' + prof.short);
+        btn.title = 'Switch active tab to ' + prof.name;
+        btn.onclick = function () {
+          if (activeTab) {
+            setTabProfile(activeTab, profKey);
+          }
+        };
+        profileNav.appendChild(btn);
       });
 
-      term.addEventListener('click', function () { input.focus(); });
-      setTimeout(function () { input.focus(); }, 50);
-      print('Josh OS terminal. Type "help".');
+      var addBtn = el('button', 'terminal-add-btn', '+');
+      addBtn.title = 'Open New Tab (Click or right-click to choose profile)';
+      addBtn.onclick = function () {
+        createTab('winterm');
+      };
+
+      topBar.appendChild(tabsNav);
+      topBar.appendChild(profileNav);
+      container.appendChild(topBar);
+      container.appendChild(viewport);
+      body.appendChild(container);
+
+      function createTab(profileKey) {
+        var prof = PROFILES[profileKey] || PROFILES.winterm;
+        var tab = {
+          id: nextTabId++,
+          profileKey: profileKey,
+          title: prof.name,
+          cwd: '/home/josh',
+          lines: [],
+          history: [],
+          historyIdx: -1,
+          contentDiv: el('div', 'term-tab-content')
+        };
+
+        // Welcome banner
+        var bannerDiv = el('div', 'term-banner', prof.banner);
+        tab.contentDiv.appendChild(bannerDiv);
+
+        tabs.push(tab);
+        renderTabs();
+        selectTab(tab);
+      }
+
+      function renderTabs() {
+        tabsNav.innerHTML = '';
+        tabs.forEach(function (tab) {
+          var prof = PROFILES[tab.profileKey];
+          var tabEl = el('div', 'terminal-tab' + (tab === activeTab ? ' active' : ''));
+          var label = el('span', 'tab-label', prof.icon + ' ' + tab.title);
+          label.onclick = function () { selectTab(tab); };
+
+          var closeBtn = el('span', 'terminal-tab-close', '×');
+          closeBtn.title = 'Close tab';
+          closeBtn.onclick = function (e) {
+            e.stopPropagation();
+            closeTab(tab);
+          };
+
+          tabEl.appendChild(label);
+          if (tabs.length > 1) {
+            tabEl.appendChild(closeBtn);
+          }
+          tabsNav.appendChild(tabEl);
+        });
+        tabsNav.appendChild(addBtn);
+
+        // Update active profile pills
+        [].forEach.call(profileNav.children, function (pill, idx) {
+          var key = ['winterm', 'gnome', 'macos', 'konsole'][idx];
+          if (activeTab && activeTab.profileKey === key) {
+            pill.classList.add('active');
+          } else {
+            pill.classList.remove('active');
+          }
+        });
+      }
+
+      function selectTab(tab) {
+        activeTab = tab;
+        var prof = PROFILES[tab.profileKey];
+        viewport.className = 'terminal-viewport ' + prof.cls;
+        viewport.innerHTML = '';
+        viewport.appendChild(tab.contentDiv);
+
+        // Render current input row
+        renderInputRow(tab);
+        renderTabs();
+        scrollBottom();
+      }
+
+      function setTabProfile(tab, profileKey) {
+        tab.profileKey = profileKey;
+        var prof = PROFILES[profileKey];
+        tab.title = prof.name;
+        printToTab(tab, '\n[Switched to ' + prof.name + ' mode]\n', 'term-stdout');
+        selectTab(tab);
+      }
+
+      function closeTab(tab) {
+        var idx = tabs.indexOf(tab);
+        if (idx === -1) return;
+        tabs.splice(idx, 1);
+        if (activeTab === tab) {
+          var next = tabs[idx] || tabs[idx - 1] || null;
+          if (next) selectTab(next);
+        } else {
+          renderTabs();
+        }
+      }
+
+      function printToTab(tab, text, cls) {
+        var line = el('div', 'term-line ' + (cls || 'term-stdout'), text);
+        tab.contentDiv.appendChild(line);
+      }
+
+      function scrollBottom() {
+        viewport.scrollTop = viewport.scrollHeight;
+      }
+
+      function renderInputRow(tab) {
+        var existingRow = tab.contentDiv.querySelector('.term-input-row');
+        if (existingRow) existingRow.remove();
+
+        var prof = PROFILES[tab.profileKey];
+        var row = el('div', 'term-input-row');
+        var promptSpan = el('span', 'term-prompt');
+        promptSpan.innerHTML = prof.promptHtml(tab.cwd);
+
+        var input = el('input', 'terminal-input');
+        input.setAttribute('spellcheck', 'false');
+        input.setAttribute('autocomplete', 'off');
+        input.value = '';
+
+        row.appendChild(promptSpan);
+        row.appendChild(input);
+        tab.contentDiv.appendChild(row);
+
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            var raw = input.value.trim();
+            tab.history.push(input.value);
+            tab.historyIdx = tab.history.length;
+
+            // Print command line into tab history
+            var line = el('div', 'term-line');
+            line.innerHTML = prof.promptHtml(tab.cwd) + escapeHtml(input.value);
+            tab.contentDiv.insertBefore(line, row);
+            input.value = '';
+
+            if (raw) {
+              executeCommand(tab, raw);
+            }
+            scrollBottom();
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (tab.history.length && tab.historyIdx > 0) {
+              tab.historyIdx--;
+              input.value = tab.history[tab.historyIdx] || '';
+            }
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (tab.historyIdx < tab.history.length - 1) {
+              tab.historyIdx++;
+              input.value = tab.history[tab.historyIdx] || '';
+            } else {
+              tab.historyIdx = tab.history.length;
+              input.value = '';
+            }
+          } else if (e.key === 'l' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            tab.contentDiv.innerHTML = '';
+            renderInputRow(tab);
+          }
+        });
+
+        setTimeout(function () { input.focus(); }, 30);
+      }
+
+      function escapeHtml(str) {
+        return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+
+      function executeCommand(tab, raw) {
+        var prof = PROFILES[tab.profileKey];
+        var parts = raw.split(/\s+/);
+        var baseCmd = parts[0].toLowerCase();
+
+        // Built-in terminal controls
+        if (baseCmd === 'clear' || baseCmd === 'cls') {
+          tab.contentDiv.innerHTML = '';
+          renderInputRow(tab);
+          return;
+        }
+
+        if (baseCmd === 'help') {
+          var helpText = [
+            'Josh OS Multi-Profile Terminal',
+            '==============================',
+            'Profiles available in tabs:',
+            '  1. Windows Terminal (PowerShell / Cmd) — profile winterm',
+            '  2. GNOME Terminal (Linux Bash)        — profile gnome',
+            '  3. macOS Terminal (Zsh)                — profile macos',
+            '  4. Konsole (KDE Plasma)               — profile konsole',
+            '',
+            'Built-in shortcuts & commands:',
+            '  profile <name>     Switch active profile (winterm, gnome, macos, konsole)',
+            '  clear, cls         Clear terminal screen',
+            '  xrandr -s <res>    Change VM screen resolution (e.g. xrandr -s 1920x1080)',
+            '  ls, dir, pwd       List files and view current directory',
+            '  cd <dir>           Change working directory',
+            '  help, about, apps  System information and installed applications',
+            '',
+            'All standard Linux/PowerShell commands execute live against the Josh OS kernel.'
+          ].join('\n');
+          printToTab(tab, helpText, 'term-stdout');
+          renderInputRow(tab);
+          return;
+        }
+
+        if (baseCmd === 'profile' && parts[1]) {
+          var targetProf = parts[1].toLowerCase();
+          if (PROFILES[targetProf]) {
+            setTabProfile(tab, targetProf);
+          } else {
+            printToTab(tab, 'Unknown profile: ' + parts[1] + '. Available: winterm, gnome, macos, konsole', 'term-stderr');
+            renderInputRow(tab);
+          }
+          return;
+        }
+
+        if (baseCmd === 'about') {
+          printToTab(tab, 'Josh OS Stage 0 live integration release with unified shell & multi-terminal host.', 'term-stdout');
+          renderInputRow(tab);
+          return;
+        }
+
+        if (baseCmd === 'apps') {
+          printToTab(tab, JoshOS.apps().map(function (a) { return a.id; }).join('   '), 'term-stdout');
+          renderInputRow(tab);
+          return;
+        }
+
+        if (baseCmd === 'open' && parts[1]) {
+          JoshOS.openApp(parts[1]);
+          printToTab(tab, 'Opening ' + parts[1] + '...', 'term-stdout');
+          renderInputRow(tab);
+          return;
+        }
+
+        // Send to real backend
+        api('/api/terminal/exec', {
+          method: 'POST',
+          body: JSON.stringify({
+            command: raw,
+            cwd: tab.cwd,
+            shell: prof.shell
+          })
+        }).then(function (res) {
+          if (res.cwd) tab.cwd = res.cwd;
+          if (res.stdout) printToTab(tab, res.stdout, 'term-stdout');
+          if (res.stderr) printToTab(tab, res.stderr, 'term-stderr');
+          renderInputRow(tab);
+          scrollBottom();
+        }).catch(function (err) {
+          // Offline / standalone fallback
+          runLocalFallback(tab, raw);
+          renderInputRow(tab);
+          scrollBottom();
+        });
+      }
+
+      function runLocalFallback(tab, raw) {
+        var parts = raw.split(/\s+/);
+        var base = parts[0].toLowerCase();
+        if (base === 'ls' || base === 'dir' || base === 'gci' || base === 'get-childitem') {
+          printToTab(tab, (FS.Home || []).map(function (f) { return f.n; }).join('   '), 'term-stdout');
+        } else if (base === 'pwd' || base === 'gl' || base === 'get-location') {
+          printToTab(tab, tab.cwd, 'term-stdout');
+        } else if (base === 'echo' || base === 'write-host') {
+          printToTab(tab, parts.slice(1).join(' '), 'term-stdout');
+        } else if (base === 'date' || base === 'get-date') {
+          printToTab(tab, new Date().toString(), 'term-stdout');
+        } else if (base === 'uname' || base === 'uname -a') {
+          printToTab(tab, 'Linux joshos 6.10.10-arch1 #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux', 'term-stdout');
+        } else if (base === 'xrandr') {
+          printToTab(tab, 'Screen 0: minimum 320 x 200, current 1024 x 768, maximum 8192 x 8192\nVirtual-1 connected primary 1024x768+0+0\n   1920x1080     60.00 +\n   1600x900      60.00\n   1366x768      60.00\n   1024x768      60.00*', 'term-stdout');
+        } else {
+          printToTab(tab, base + ': command not found. (Backend offline. Type "help")', 'term-stderr');
+        }
+      }
+
+      viewport.addEventListener('click', function () {
+        var input = viewport.querySelector('.terminal-input');
+        if (input) input.focus();
+      });
+
+      // Start initial default tab
+      createTab('winterm');
     }
   });
 
