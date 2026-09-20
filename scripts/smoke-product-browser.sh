@@ -4,7 +4,7 @@ set -euo pipefail
 iso="${1:?usage: smoke-product-browser.sh <josh-os.iso> [data-image]}"
 data_image="${2:-browser-persistence-test.img}"
 qemu="${QEMU:-qemu-system-x86_64}"
-timeout_seconds="${BROWSER_SMOKE_TIMEOUT:-210}"
+timeout_seconds="${BROWSER_SMOKE_TIMEOUT:-360}"
 
 command -v "$qemu" >/dev/null
 command -v mkfs.ext4 >/dev/null
@@ -20,7 +20,25 @@ run_boot() {
   local log="browser-boot-${pass}.log"
   rm -f "$log"
 
-  "$qemu"     -machine q35     -m 2048     -boot order=d     -cdrom "$iso"     -drive file="$data_image",format=raw,if=virtio     -nic user,model=e1000     -audiodev none,id=josh-audio     -device intel-hda     -device hda-duplex,audiodev=josh-audio     -display none     -serial "file:$log"     -monitor none     -no-reboot     >/dev/null 2>&1 &
+  qemu_args=(
+    -machine q35
+    -m 2048
+    -boot order=d
+    -cdrom "$iso"
+    -drive "file=$data_image,format=raw,if=virtio"
+    -nic user,model=e1000
+    -audiodev none,id=josh-audio
+    -device intel-hda
+    -device hda-duplex,audiodev=josh-audio
+    -display none
+    -serial "file:$log"
+    -monitor none
+    -no-reboot
+  )
+  if [[ -e /dev/kvm ]]; then
+    qemu_args=(-accel kvm "${qemu_args[@]}")
+  fi
+  "$qemu" "${qemu_args[@]}" >/dev/null 2>&1 &
   local pid=$!
 
   cleanup() {

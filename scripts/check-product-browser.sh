@@ -49,8 +49,11 @@ media_probe="$root/usr/local/lib/josh-os/browser-media-probe"
 media_page="$root/usr/local/share/josh-os/browser-media-probe.html"
 policy="$root/etc/chromium/policies/managed/josh-os.json"
 catalog="$root/opt/josh-os/app-store/catalog.json"
+autologin_group_hook="$root/etc/pacman.d/hooks/15-josh-autologin-group.hook"
+live_user_hook="$root/etc/pacman.d/hooks/20-josh-live-user.hook"
+lightdm="$root/etc/lightdm/lightdm.conf.d/50-josh-os.conf"
 
-for path in "$launcher" "$acceptance" "$runtime_acceptance" "$runtime_page" "$runtime_download" "$session" "$persist" "$media_probe" "$media_page" "$policy" "$catalog"; do
+for path in "$launcher" "$acceptance" "$runtime_acceptance" "$runtime_page" "$runtime_download" "$session" "$persist" "$media_probe" "$media_page" "$policy" "$catalog" "$autologin_group_hook" "$live_user_hook" "$lightdm"; do
   [[ -f "$path" ]] || { echo "browser check: missing $path" >&2; exit 1; }
 done
 
@@ -65,6 +68,13 @@ if grep -Eq -- '^[[:space:]]*--disable-gpu([[:space:]]|$)' "$launcher"; then
   echo "browser check: launcher must not disable GPU acceleration" >&2
   exit 1
 fi
+
+grep -q 'remove from airootfs' "$autologin_group_hook"
+grep -q 'groupadd -f -r autologin' "$autologin_group_hook"
+grep -q 'remove from airootfs' "$live_user_hook"
+grep -q "useradd -u 1000 -G autologin -p '' -s /usr/bin/bash -m josh" "$live_user_hook"
+grep -q '^autologin-user=josh$' "$lightdm"
+grep -q '^autologin-session=josh-os$' "$lightdm"
 
 grep -q 'JOSH-DATA' "$persist"
 grep -q 'ext4' "$persist"
