@@ -34,7 +34,9 @@ for _ in $(seq 1 60); do
     audio_ok=1
   fi
 
-  if pgrep -u josh -x gnome-keyring-daemon >/dev/null 2>&1; then
+  # Linux comm names are limited to 15 characters, so the daemon appears as
+  # gnome-keyring-d; match its command line instead of using pgrep -x.
+  if pgrep -u josh -f '[g]nome-keyring-daemon' >/dev/null 2>&1; then
     keyring_ok=1
   fi
 
