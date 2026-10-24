@@ -30,25 +30,25 @@ The first selected machine is **DadLAN Laptop #10, a Compaq 610**. It is a devel
 - [x] graphical command shell
 - [x] serial boot marker for automated testing
 - [x] GitHub Actions ISO build + QEMU smoke test
-- [ ] publish downloadable ISO from tagged releases
-- [ ] boot-test the native ISO on the first selected physical target — DadLAN Laptop #10 / Compaq 610 — from removable media, then record repeatability and limitations
+- [ ] **UN-20261024-156-0033** publish downloadable ISO from tagged releases
+- [ ] **UN-20261024-156-0034** boot-test the native ISO on the first selected physical target — DadLAN Laptop #10 / Compaq 610 — from removable media, then record repeatability and limitations
 
 ## Product track 0.1 — Define the desktop
 
 Carry forward the best concepts already explored in the browser prototype:
 
-- [ ] canonical App model
-- [ ] canonical Window model
-- [ ] focus and stacking model
-- [ ] move/resize/minimise/maximise
-- [ ] left/right/fullscreen snapping
-- [ ] dock and launcher
-- [ ] menu/status bar
-- [ ] notification model
-- [ ] settings and persisted preferences
-- [ ] light/dark themes
-- [ ] shared design-token specification
-- [ ] accessibility rules for keyboard navigation, focus and contrast
+- [ ] **UN-20261024-156-0040** canonical App model
+- [ ] **UN-20261024-156-0041** canonical Window model
+- [ ] **UN-20261024-156-0042** focus and stacking model
+- [ ] **UN-20261024-156-0043** move/resize/minimise/maximise
+- [ ] **UN-20261024-156-0044** left/right/fullscreen snapping
+- [ ] **UN-20261024-156-0045** dock and launcher
+- [ ] **UN-20261024-156-0046** menu/status bar
+- [ ] **UN-20261024-156-0047** notification model
+- [ ] **UN-20261024-156-0048** settings and persisted preferences
+- [ ] **UN-20261024-156-0049** light/dark themes
+- [ ] **UN-20261024-156-0050** shared design-token specification
+- [ ] **UN-20261024-156-0051** accessibility rules for keyboard navigation, focus and contrast
 
 The browser implementation is a design/prototyping environment, not the production OS architecture.
 
