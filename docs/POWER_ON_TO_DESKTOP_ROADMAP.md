@@ -508,48 +508,48 @@ Maintain an explicit matrix for each tested machine:
 
 ## Milestone A — define the seam
 
-- [ ] Write Josh Boot Protocol v0 structure.
-- [ ] Add protocol-version checking to the JoshOS kernel.
-- [ ] Document required vs optional fields.
-- [ ] Add protocol conformance fixtures/tests.
+- [ ] **UN-20261024-153-0511** Write Josh Boot Protocol v0 structure.
+- [ ] **UN-20261024-153-0512** Add protocol-version checking to the JoshOS kernel.
+- [ ] **UN-20261024-153-0513** Document required vs optional fields.
+- [ ] **UN-20261024-153-0514** Add protocol conformance fixtures/tests.
 
 ## Milestone B — make JoshBootloader load the real kernel
 
-- [ ] ELF64 loader.
+- [ ] **UN-20261024-153-0518** ELF64 loader.
 - [ ] x86-64 long-mode hand-off.
-- [ ] framebuffer hand-off.
-- [ ] memory-map hand-off.
-- [ ] ACPI pointer hand-off.
-- [ ] serial diagnostics.
-- [ ] boot JoshOS kernel in QEMU without Limine.
+- [ ] **UN-20261024-153-0520** framebuffer hand-off.
+- [ ] **UN-20261024-153-0521** memory-map hand-off.
+- [ ] **UN-20261024-153-0522** ACPI pointer hand-off.
+- [ ] **UN-20261024-153-0523** serial diagnostics.
+- [ ] **UN-20261024-153-0524** boot JoshOS kernel in QEMU without Limine.
 
 Limine remains a supported/reference boot path until JoshBootloader reaches equivalent reliability.
 
 ## Milestone C — boot UX
 
-- [ ] JoshBIOS firmware splash.
-- [ ] setup/boot/recovery key handling.
-- [ ] JoshBootloader hidden-by-default boot menu.
-- [ ] previous-known-good entry.
-- [ ] Josh OS real progress milestones.
+- [ ] **UN-20261024-153-0530** JoshBIOS firmware splash.
+- [ ] **UN-20261024-153-0531** setup/boot/recovery key handling.
+- [ ] **UN-20261024-153-0532** JoshBootloader hidden-by-default boot menu.
+- [ ] **UN-20261024-153-0533** previous-known-good entry.
+- [ ] **UN-20261024-153-0534** Josh OS real progress milestones.
 
 ## Milestone D — recoverability
 
-- [ ] boot-health state.
-- [ ] automatic recovery menu after repeated failures.
-- [ ] kernel rescue target.
-- [ ] documented firmware recovery procedure.
-- [ ] update rollback story.
+- [ ] **UN-20261024-153-0538** boot-health state.
+- [ ] **UN-20261024-153-0539** automatic recovery menu after repeated failures.
+- [ ] **UN-20261024-153-0540** kernel rescue target.
+- [ ] **UN-20261024-153-0541** documented firmware recovery procedure.
+- [ ] **UN-20261024-153-0542** update rollback story.
 
 ## Milestone E — first supported physical development machine
 
-- [ ] choose exact board/system;
-- [ ] external firmware recovery method;
-- [ ] support matrix;
-- [ ] reproduce cold boot repeatedly;
-- [ ] validate reboot/shutdown;
-- [ ] validate Ventoy/USB boot;
-- [ ] only then consider firmware flashing experiments.
+- [ ] **UN-20261024-153-0546** choose exact board/system;
+- [ ] **UN-20261024-153-0547** external firmware recovery method;
+- [ ] **UN-20261024-153-0548** support matrix;
+- [ ] **UN-20261024-153-0549** reproduce cold boot repeatedly;
+- [ ] **UN-20261024-153-0550** validate reboot/shutdown;
+- [ ] **UN-20261024-153-0551** validate Ventoy/USB boot;
+- [ ] **UN-20261024-153-0552** only then consider firmware flashing experiments.
 
 ---
 
