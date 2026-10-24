@@ -13,30 +13,30 @@ Each stage should produce something testable rather than a pile of scaffolding.
 - [x] notifications
 - [x] About, Files, Terminal, Editor and Settings prototypes
 - [x] ArchISO build pipeline
-- [ ] keyboard-driven window management
-- [ ] global launcher / command palette
-- [ ] tiling beyond halves
-- [ ] manual VirtualBox smoke test of the generated ISO
+- [ ] **UN-20261024-155-0016** keyboard-driven window management
+- [ ] **UN-20261024-155-0017** global launcher / command palette
+- [ ] **UN-20261024-155-0018** tiling beyond halves
+- [ ] **UN-20261024-155-0019** manual VirtualBox smoke test of the generated ISO
 
 ## Stage 1 — Josh OS 1.x: real desktop, Linux underneath
 
 - [x] choose a Linux-backed compatibility path for the first usable product
-- [ ] spike both Smithay and wlroots before choosing
-- [ ] implement a Wayland compositor
-- [ ] port the shared window model
-- [ ] real panel, dock, launcher and notification surfaces
-- [ ] Settings backed by real system services
-- [ ] installer
-- [ ] signed app repository and Flatpak application packaging/update story
-- [ ] Wine-managed Windows application compatibility layer
-- [ ] accessibility and keyboard-navigation pass
+- [ ] **UN-20261024-155-0024** spike both Smithay and wlroots before choosing
+- [ ] **UN-20261024-155-0025** implement a Wayland compositor
+- [ ] **UN-20261024-155-0026** port the shared window model
+- [ ] **UN-20261024-155-0027** real panel, dock, launcher and notification surfaces
+- [ ] **UN-20261024-155-0028** Settings backed by real system services
+- [ ] **UN-20261024-155-0029** installer
+- [ ] **UN-20261024-155-0030** signed app repository and Flatpak application packaging/update story
+- [ ] **UN-20261024-155-0031** Wine-managed Windows application compatibility layer
+- [ ] **UN-20261024-155-0032** accessibility and keyboard-navigation pass
 
 ## Stage 2 — own more userland where it helps
 
-- [ ] Josh file-service/API model
-- [ ] Josh session/device concepts
-- [ ] Josh application manifest/capability model
-- [ ] stable app-facing APIs insulated from Linux implementation details
+- [ ] **UN-20261024-155-0036** Josh file-service/API model
+- [ ] **UN-20261024-155-0037** Josh session/device concepts
+- [ ] **UN-20261024-155-0038** Josh application manifest/capability model
+- [ ] **UN-20261024-155-0039** stable app-facing APIs insulated from Linux implementation details
 
 ## Stage 3 — converge with the native Josh kernel
 
