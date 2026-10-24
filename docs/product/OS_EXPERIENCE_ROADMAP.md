@@ -22,11 +22,11 @@ The design-token source should eventually generate constrained assets/constants 
 
 Before adding polish:
 
-- [ ] every visible progress state corresponds to a real system milestone;
-- [ ] logs are accessible with a key/action;
-- [ ] startup failures transition to diagnostics/recovery rather than freezing;
-- [ ] firmware, bootloader, kernel and userspace versions are available in diagnostics;
-- [ ] no fake progress bar.
+- [ ] **UN-20261024-154-0025** every visible progress state corresponds to a real system milestone;
+- [ ] **UN-20261024-154-0026** logs are accessible with a key/action;
+- [ ] **UN-20261024-154-0027** startup failures transition to diagnostics/recovery rather than freezing;
+- [ ] **UN-20261024-154-0028** firmware, bootloader, kernel and userspace versions are available in diagnostics;
+- [ ] **UN-20261024-154-0029** no fake progress bar.
 
 Suggested real milestones:
 
@@ -92,11 +92,11 @@ Use simple keyboard navigation first. Mouse support is unnecessary at this layer
 
 Once the native kernel can draw reliably:
 
-- [ ] render from a small implementation-independent boot theme;
-- [ ] show real milestone text;
-- [ ] reveal logs/serial-equivalent output on command;
-- [ ] display recovery prompt after detected failed boot;
-- [ ] make headless/serial boot remain fully supported.
+- [ ] **UN-20261024-154-0095** render from a small implementation-independent boot theme;
+- [ ] **UN-20261024-154-0096** show real milestone text;
+- [ ] **UN-20261024-154-0097** reveal logs/serial-equivalent output on command;
+- [ ] **UN-20261024-154-0098** display recovery prompt after detected failed boot;
+- [ ] **UN-20261024-154-0099** make headless/serial boot remain fully supported.
 
 The Linux-backed product track should mimic the same milestone vocabulary so users do not experience two unrelated products.
 
@@ -162,20 +162,20 @@ Principles:
 
 The browser prototype already proves useful concepts. Promote them carefully:
 
-- [ ] canonical App model;
-- [ ] canonical Window model;
-- [ ] focus/stacking;
-- [ ] move/resize/minimise/maximise;
-- [ ] snapping;
-- [ ] workspaces if they solve a real need;
-- [ ] launcher / command palette;
-- [ ] dock;
-- [ ] status/menu area;
-- [ ] notifications;
-- [ ] Settings;
-- [ ] Files;
-- [ ] Terminal;
-- [ ] Text Editor.
+- [ ] **UN-20261024-154-0165** canonical App model;
+- [ ] **UN-20261024-154-0166** canonical Window model;
+- [ ] **UN-20261024-154-0167** focus/stacking;
+- [ ] **UN-20261024-154-0168** move/resize/minimise/maximise;
+- [ ] **UN-20261024-154-0169** snapping;
+- [ ] **UN-20261024-154-0170** workspaces if they solve a real need;
+- [ ] **UN-20261024-154-0171** launcher / command palette;
+- [ ] **UN-20261024-154-0172** dock;
+- [ ] **UN-20261024-154-0173** status/menu area;
+- [ ] **UN-20261024-154-0174** notifications;
+- [ ] **UN-20261024-154-0175** Settings;
+- [ ] **UN-20261024-154-0176** Files;
+- [ ] **UN-20261024-154-0177** Terminal;
+- [ ] **UN-20261024-154-0178** Text Editor.
 
 Before adding many apps, make the shared window/application APIs stable enough that apps are not coupled to one compositor implementation.
 
