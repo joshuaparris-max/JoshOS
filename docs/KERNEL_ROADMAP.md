@@ -30,9 +30,9 @@ Use this machine to drive concrete early decisions, but keep hardware-specific q
 - [x] Define an internal Josh-owned boot-context representation.
 - [x] Validate framebuffer geometry and address arithmetic.
 - [x] Validate/sanitise memory-map entries.
-- [ ] Preserve raw boot-protocol metadata for debug builds.
+- [ ] **UN-20261024-152-0033** Preserve raw boot-protocol metadata for debug builds.
 - [x] Add support for Josh Boot Protocol alongside Limine.
-- [ ] Keep Limine as a reference boot path until the JoshBootloader path is equally reliable.
+- [ ] **UN-20261024-152-0035** Keep Limine as a reference boot path until the JoshBootloader path is equally reliable.
 
 The Josh-owned `boot_context_t` now preserves framebuffer data, a bounded internal memory-map representation, usable-memory accounting and firmware-table pointers without leaking Limine structures into the rest of the kernel. Josh Boot Protocol entries are range-checked for overflow, zero-length entries are discarded, and unknown/reserved memory is kept non-usable by default.
 
@@ -56,8 +56,8 @@ Implement:
 - [x] general-protection-fault handler;
 - [x] double-fault strategy;
 - [x] register dump;
-- [ ] stack trace groundwork where feasible;
-- [ ] graphical + serial panic path.
+- [ ] **UN-20261024-152-0059** stack trace groundwork where feasible;
+- [ ] **UN-20261024-152-0060** graphical + serial panic path.
 
 The kernel installs its own 64-bit GDT and TSS before loading the IDT. TSS IST1 points at a dedicated 16 KiB emergency stack and exception vector 8 selects that IST for double-fault entry. CI deliberately makes #GP delivery fail, forcing the CPU into vector 8, and requires the double-fault panic marker and zero error code. Josh-owned x86-64 assembly stubs now normalise all vectors into a canonical exception frame and preserve RAX, RBX, RCX, RDX, RSI, RDI, RBP, RSP and R8–R15 before entering C. The serial panic reports those registers alongside vector, error code, RIP, CS and RFLAGS; page faults also report CR2. CI seeds known RAX and R15 values immediately before an invalid opcode and requires the panic dump to recover both values exactly. Stack-trace groundwork and the graphical panic path are still outstanding.
 
@@ -105,8 +105,8 @@ JoshOS CI run `35395723343` booted through Limine with the allocator and the fir
 - [x] framebuffer mapping;
 - [x] MMIO mapping API;
 - [x] temporary mapping mechanism;
-- [ ] guard pages around critical stacks;
-- [ ] address-space abstraction for future processes.
+- [ ] **UN-20261024-152-0108** guard pages around critical stacks;
+- [ ] **UN-20261024-152-0109** address-space abstraction for future processes.
 
 The kernel now allocates its own x86-64 page-table hierarchy from the PMM, switches CR3, and verifies that it is executing on the Josh-owned root. The higher-half kernel maps text read-only/executable, rodata read-only/NX, and data/BSS read-write/NX. The physical direct map is NX, the framebuffer is mapped read-write/NX with cache-disabling flags, and dedicated MMIO plus one-page temporary mapping APIs exist for devices and firmware-table access.
 
@@ -157,12 +157,12 @@ After single-core correctness:
 - [x] CPUID capability inventory;
 - [x] required-feature validation;
 - [x] per-CPU state;
-- [ ] application processor startup;
+- [ ] **UN-20261024-152-0160** application processor startup;
 - [x] per-CPU stacks;
 - [x] interrupt routing;
 - [x] spinlock primitives;
-- [ ] cross-CPU signalling;
-- [ ] SMP-safe allocator and scheduler work.
+- [ ] **UN-20261024-152-0164** cross-CPU signalling;
+- [ ] **UN-20261024-152-0165** SMP-safe allocator and scheduler work.
 
 CPUID inventory records APIC/x2APIC, MSR, TSC, PAE, NX, invariant TSC, SMEP and SMAP capability; the boot path validates its required CPU feature set and enables EFER.NXE before installing the owned mappings. ACPI CPU entries are converted into a bounded per-CPU topology with a identified BSP, per-CPU state and dedicated 32 KiB kernel-stack allocations. IRQ routing targets the BSP's local APIC ID, and x86 spinlocks include try-lock plus IRQ-save/restore forms with a host contention stress test.
 
@@ -174,12 +174,12 @@ GitHub Actions run `35407321192` required `JOSHOS_SMP_MULTICPU_OK`, `JOSHOS_PERC
 
 ## K7 — Device discovery and driver framework
 
-- [ ] PCI/PCIe enumeration;
-- [ ] BAR parsing;
-- [ ] MMIO/PIO resource model;
-- [ ] device/driver matching;
-- [ ] structured device tree/inventory exposed to userspace later;
-- [ ] clear ownership/lifetime rules.
+- [ ] **UN-20261024-152-0177** PCI/PCIe enumeration;
+- [ ] **UN-20261024-152-0178** BAR parsing;
+- [ ] **UN-20261024-152-0179** MMIO/PIO resource model;
+- [ ] **UN-20261024-152-0180** device/driver matching;
+- [ ] **UN-20261024-152-0181** structured device tree/inventory exposed to userspace later;
+- [ ] **UN-20261024-152-0182** clear ownership/lifetime rules.
 
 First drivers should be chosen for testability and usefulness, not novelty.
 
@@ -189,13 +189,13 @@ First drivers should be chosen for testability and usefulness, not novelty.
 
 Move beyond legacy keyboard polling:
 
-- [ ] PS/2 interrupt-driven keyboard;
-- [ ] PS/2 mouse where useful for early desktop work;
-- [ ] input event abstraction;
-- [ ] key state/modifiers;
-- [ ] repeat;
-- [ ] pointer events;
-- [ ] userspace-facing input queue later.
+- [ ] **UN-20261024-152-0192** PS/2 interrupt-driven keyboard;
+- [ ] **UN-20261024-152-0193** PS/2 mouse where useful for early desktop work;
+- [ ] **UN-20261024-152-0194** input event abstraction;
+- [ ] **UN-20261024-152-0195** key state/modifiers;
+- [ ] **UN-20261024-152-0196** repeat;
+- [ ] **UN-20261024-152-0197** pointer events;
+- [ ] **UN-20261024-152-0198** userspace-facing input queue later.
 
 USB HID is a later major milestone rather than being hidden inside “mouse support”.
 
@@ -203,15 +203,15 @@ USB HID is a later major milestone rather than being hidden inside “mouse supp
 
 ## K9 — Processes and threads
 
-- [ ] kernel thread primitive;
-- [ ] scheduler;
-- [ ] context switching;
-- [ ] per-thread kernel stack;
-- [ ] process/address-space object;
-- [ ] user-mode transition;
-- [ ] process lifecycle;
-- [ ] wait/exit;
-- [ ] basic signals/events only if the Josh process model needs them.
+- [ ] **UN-20261024-152-0206** kernel thread primitive;
+- [ ] **UN-20261024-152-0207** scheduler;
+- [ ] **UN-20261024-152-0208** context switching;
+- [ ] **UN-20261024-152-0209** per-thread kernel stack;
+- [ ] **UN-20261024-152-0210** process/address-space object;
+- [ ] **UN-20261024-152-0211** user-mode transition;
+- [ ] **UN-20261024-152-0212** process lifecycle;
+- [ ] **UN-20261024-152-0213** wait/exit;
+- [ ] **UN-20261024-152-0214** basic signals/events only if the Josh process model needs them.
 
 Define the process model before copying POSIX by habit.
 
@@ -219,13 +219,13 @@ Define the process model before copying POSIX by habit.
 
 ## K10 — Syscall ABI
 
-- [ ] explicit syscall numbering/versioning;
-- [ ] argument validation;
-- [ ] user-pointer validation/copy helpers;
-- [ ] stable error model;
-- [ ] capability/handle model groundwork;
-- [ ] generated or shared syscall definitions where practical;
-- [ ] ABI tests.
+- [ ] **UN-20261024-152-0222** explicit syscall numbering/versioning;
+- [ ] **UN-20261024-152-0223** argument validation;
+- [ ] **UN-20261024-152-0224** user-pointer validation/copy helpers;
+- [ ] **UN-20261024-152-0225** stable error model;
+- [ ] **UN-20261024-152-0226** capability/handle model groundwork;
+- [ ] **UN-20261024-152-0227** generated or shared syscall definitions where practical;
+- [ ] **UN-20261024-152-0228** ABI tests.
 
 The first ABI should be deliberately small.
 
@@ -233,13 +233,13 @@ The first ABI should be deliberately small.
 
 ## K11 — Init and userspace
 
-- [ ] executable loader;
-- [ ] first userspace init;
-- [ ] service supervisor;
-- [ ] logging service;
-- [ ] shell moved out of the kernel;
-- [ ] session service;
-- [ ] recovery/rescue target.
+- [ ] **UN-20261024-152-0236** executable loader;
+- [ ] **UN-20261024-152-0237** first userspace init;
+- [ ] **UN-20261024-152-0238** service supervisor;
+- [ ] **UN-20261024-152-0239** logging service;
+- [ ] **UN-20261024-152-0240** shell moved out of the kernel;
+- [ ] **UN-20261024-152-0241** session service;
+- [ ] **UN-20261024-152-0242** recovery/rescue target.
 
 The graphical shell currently in the kernel should become a test/demo path once real userspace exists.
 
@@ -249,17 +249,17 @@ The graphical shell currently in the kernel should become a test/demo path once 
 
 Start with a clean block-device boundary.
 
-- [ ] block-device API;
-- [ ] PCI storage discovery;
-- [ ] one QEMU-friendly storage driver;
-- [ ] AHCI;
-- [ ] NVMe;
-- [ ] partition parsing;
-- [ ] filesystem decision;
-- [ ] VFS;
-- [ ] mounts;
-- [ ] caching;
-- [ ] write ordering and flush semantics.
+- [ ] **UN-20261024-152-0252** block-device API;
+- [ ] **UN-20261024-152-0253** PCI storage discovery;
+- [ ] **UN-20261024-152-0254** one QEMU-friendly storage driver;
+- [ ] **UN-20261024-152-0255** AHCI;
+- [ ] **UN-20261024-152-0256** NVMe;
+- [ ] **UN-20261024-152-0257** partition parsing;
+- [ ] **UN-20261024-152-0258** filesystem decision;
+- [ ] **UN-20261024-152-0259** VFS;
+- [ ] **UN-20261024-152-0260** mounts;
+- [ ] **UN-20261024-152-0261** caching;
+- [ ] **UN-20261024-152-0262** write ordering and flush semantics.
 
 Data integrity outranks filesystem feature count.
 
@@ -267,13 +267,13 @@ Data integrity outranks filesystem feature count.
 
 ## K13 — Files and capabilities
 
-- [ ] file/object handles;
-- [ ] directory iteration;
-- [ ] metadata model;
-- [ ] permissions/capabilities;
-- [ ] namespace/mount model;
-- [ ] device nodes only if they fit the Josh model;
-- [ ] stable application-facing file service above raw kernel APIs.
+- [ ] **UN-20261024-152-0270** file/object handles;
+- [ ] **UN-20261024-152-0271** directory iteration;
+- [ ] **UN-20261024-152-0272** metadata model;
+- [ ] **UN-20261024-152-0273** permissions/capabilities;
+- [ ] **UN-20261024-152-0274** namespace/mount model;
+- [ ] **UN-20261024-152-0275** device nodes only if they fit the Josh model;
+- [ ] **UN-20261024-152-0276** stable application-facing file service above raw kernel APIs.
 
 Do not expose kernel internals as the permanent Josh app API.
 
@@ -285,7 +285,7 @@ The first native networking slice is deliberately driver-independent and host-te
 
 - [x] network device abstraction;
 - [x] loopback device + live kernel self-test;
-- [ ] first QEMU NIC driver;
+- [ ] **UN-20261024-152-0288** first QEMU NIC driver;
 - [x] Ethernet frame encode/decode primitives;
 - [x] ARP packet encode/decode primitives;
 - [x] IPv4 packet encode/decode + header checksum primitives;
@@ -294,15 +294,15 @@ The first native networking slice is deliberately driver-independent and host-te
 - [x] DHCP OFFER/ACK reply parser;
 - [x] DNS A-query builder + A-response parser;
 - [x] TCP segment parser + IPv4 checksum primitive;
-- [ ] ARP cache and neighbour state;
-- [ ] IPv4 interface/routing state;
-- [ ] live ICMP over a NIC;
-- [ ] live UDP endpoints;
-- [ ] DHCP client state machine, timers and lease renewal;
-- [ ] DNS resolver transport/cache;
-- [ ] TCP connection state machine, retransmission, flow control and timers;
-- [ ] sockets or deliberately chosen Josh networking API;
-- [ ] later IPv6.
+- [ ] **UN-20261024-152-0297** ARP cache and neighbour state;
+- [ ] **UN-20261024-152-0298** IPv4 interface/routing state;
+- [ ] **UN-20261024-152-0299** live ICMP over a NIC;
+- [ ] **UN-20261024-152-0300** live UDP endpoints;
+- [ ] **UN-20261024-152-0301** DHCP client state machine, timers and lease renewal;
+- [ ] **UN-20261024-152-0302** DNS resolver transport/cache;
+- [ ] **UN-20261024-152-0303** TCP connection state machine, retransmission, flow control and timers;
+- [ ] **UN-20261024-152-0304** sockets or deliberately chosen Josh networking API;
+- [ ] **UN-20261024-152-0305** later IPv6.
 
 The checked protocol items above are **wire-format primitives**, not a complete TCP/IP stack. Host tests exercise valid, truncated, malformed and checksum paths, and kernel CI requires the network-device loopback self-test marker. A real e1000/virtio-net path remains dependent on PCI/device discovery, MMIO/DMA, interrupts and stable timeouts/timers.
 
@@ -321,14 +321,14 @@ Networking must include packet validation and hostile-input testing from the sta
 
 Treat USB as its own programme:
 
-- [ ] controller discovery;
-- [ ] xHCI first for modern machines;
-- [ ] transfer rings;
-- [ ] hub enumeration;
-- [ ] HID keyboard/mouse;
-- [ ] mass storage;
-- [ ] hotplug;
-- [ ] power/state handling.
+- [ ] **UN-20261024-152-0324** controller discovery;
+- [ ] **UN-20261024-152-0325** xHCI first for modern machines;
+- [ ] **UN-20261024-152-0326** transfer rings;
+- [ ] **UN-20261024-152-0327** hub enumeration;
+- [ ] **UN-20261024-152-0328** HID keyboard/mouse;
+- [ ] **UN-20261024-152-0329** mass storage;
+- [ ] **UN-20261024-152-0330** hotplug;
+- [ ] **UN-20261024-152-0331** power/state handling.
 
 ---
 
@@ -338,13 +338,13 @@ The existing framebuffer is a good bootstrap path.
 
 Progression:
 
-- [ ] generic framebuffer surface abstraction;
-- [ ] damage tracking;
-- [ ] compositor-facing buffer model;
-- [ ] input-to-surface routing;
-- [ ] display modes;
-- [ ] multi-monitor model;
-- [ ] GPU acceleration only after the software path is stable.
+- [ ] **UN-20261024-152-0341** generic framebuffer surface abstraction;
+- [ ] **UN-20261024-152-0342** damage tracking;
+- [ ] **UN-20261024-152-0343** compositor-facing buffer model;
+- [ ] **UN-20261024-152-0344** input-to-surface routing;
+- [ ] **UN-20261024-152-0345** display modes;
+- [ ] **UN-20261024-152-0346** multi-monitor model;
+- [ ] **UN-20261024-152-0347** GPU acceleration only after the software path is stable.
 
 The product track can mature its compositor model on Linux first; the kernel track should eventually host the same conceptual Window/Surface contracts.
 
@@ -352,23 +352,23 @@ The product track can mature its compositor model on Linux first; the kernel tra
 
 ## K17 — Audio
 
-- [ ] audio device abstraction;
-- [ ] one virtual/test driver;
-- [ ] stream/ring-buffer model;
-- [ ] mixer/service in userspace where practical;
-- [ ] real hardware expansion later.
+- [ ] **UN-20261024-152-0355** audio device abstraction;
+- [ ] **UN-20261024-152-0356** one virtual/test driver;
+- [ ] **UN-20261024-152-0357** stream/ring-buffer model;
+- [ ] **UN-20261024-152-0358** mixer/service in userspace where practical;
+- [ ] **UN-20261024-152-0359** real hardware expansion later.
 
 ---
 
 ## K18 — Power management
 
-- [ ] ACPI discovery/parsing;
-- [ ] clean power-off;
-- [ ] reboot paths;
-- [ ] CPU idle;
-- [ ] suspend/resume design;
-- [ ] laptop lid/battery model later;
-- [ ] wake events.
+- [ ] **UN-20261024-152-0365** ACPI discovery/parsing;
+- [ ] **UN-20261024-152-0366** clean power-off;
+- [ ] **UN-20261024-152-0367** reboot paths;
+- [ ] **UN-20261024-152-0368** CPU idle;
+- [ ] **UN-20261024-152-0369** suspend/resume design;
+- [ ] **UN-20261024-152-0370** laptop lid/battery model later;
+- [ ] **UN-20261024-152-0371** wake events.
 
 Suspend/resume should be treated as a system-wide checkpoint/restore problem, not one ACPI call.
 
@@ -376,15 +376,15 @@ Suspend/resume should be treated as a system-wide checkpoint/restore problem, no
 
 ## K19 — Security hardening
 
-- [ ] W^X memory policy;
-- [ ] NX;
-- [ ] SMEP/SMAP where available;
-- [ ] user/kernel isolation;
-- [ ] randomised identifiers/ASLR strategy where meaningful;
-- [ ] entropy subsystem;
-- [ ] capability-based authority or another explicit permission model;
-- [ ] signed/verified executable policy if adopted;
-- [ ] fuzzable parsers for filesystem/network/protocol inputs.
+- [ ] **UN-20261024-152-0379** W^X memory policy;
+- [ ] **UN-20261024-152-0380** NX;
+- [ ] **UN-20261024-152-0381** SMEP/SMAP where available;
+- [ ] **UN-20261024-152-0382** user/kernel isolation;
+- [ ] **UN-20261024-152-0383** randomised identifiers/ASLR strategy where meaningful;
+- [ ] **UN-20261024-152-0384** entropy subsystem;
+- [ ] **UN-20261024-152-0385** capability-based authority or another explicit permission model;
+- [ ] **UN-20261024-152-0386** signed/verified executable policy if adopted;
+- [ ] **UN-20261024-152-0387** fuzzable parsers for filesystem/network/protocol inputs.
 
 ---
 
